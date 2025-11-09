@@ -1,0 +1,45 @@
+name: Matrix Build with Artifacts - build-3762545
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - variant: ubuntu-node-16
+            os: ubuntu-latest
+            node-version: '16'
+          - variant: macos-node-18
+            os: macos-latest
+            node-version: '18'
+          - variant: windows-node-14
+            os: windows-latest
+            node-version: '14'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - id: matrix-3762545
+        name: matrix-3762545
+        run: echo "Running build for variant: ${{ matrix.variant }}"
+
+      - name: Generate build artifact file
+        run: |
+          node -e "const fs=require('fs'); const content='Build output for variant: ${{ matrix.variant }}\\nNode: ${{ matrix.node-version }}\\nRunner: ' + process.platform + '\\n'; fs.writeFileSync('output.txt', content, {encoding:'utf8'});"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-3762545-${{ matrix.variant }}
+          path: output.txt
